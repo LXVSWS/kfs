@@ -26,15 +26,15 @@ $(NAME):	$(OBJS)
 all:		$(NAME)
 
 clean:
-			$(RM) $(OBJS) $(BOOT)
+			$(RM) $(OBJS)
 
 fclean:		clean
-			$(RM) $(NAME)
+			$(RM) $(NAME) $(BOOT)
 
 re:			fclean all
 
-run:		$(NAME)
-			qemu-system-i386 -kernel $(NAME)
+run:		$(ISO)
+			qemu-system-i386 -cdrom $(ISO)
 
 iso:		$(NAME)
 			mkdir -p $(BOOT)/grub
@@ -42,7 +42,4 @@ iso:		$(NAME)
 			echo 'menuentry "kfs" {\n\tmultiboot /$(BOOT)/$(NAME)\n}' > $(BOOT)/grub/grub.cfg
 			grub-mkrescue -o $(ISO) .
 
-start:		$(ISO)
-			qemu-system-i386 -cdrom $(ISO)
-
-.PHONY:		all clean fclean re run iso start
+.PHONY:		all clean fclean re run iso
