@@ -1,6 +1,8 @@
 NAME	= kernel.bin
 CSRCS	= kernel.c
 ASRCS	= boot.s
+ISO		= kfs.iso
+
 OBJS	= $(CSRCS:.c=.o) $(ASRCS:.s=.o)
 
 CC		= gcc
@@ -31,9 +33,16 @@ fclean:		clean
 
 re:			fclean all
 
+run:		$(NAME)
+			qemu-system-i386 -kernel $(NAME)
+
 iso:		$(NAME)
 			mkdir -p $(BOOT)/grub
 			cp $(NAME) $(BOOT)
 			echo 'menuentry "kfs" {\n\tmultiboot /$(BOOT)/$(NAME)\n}' > $(BOOT)/grub/grub.cfg
+			grub-mkrescue -o $(ISO) .
 
-.PHONY:		all clean fclean re
+start:		$(ISO)
+			qemu-system-i386 -cdrom $(ISO)
+
+.PHONY:		all clean fclean re run iso start
