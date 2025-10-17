@@ -36,10 +36,13 @@ re:			fclean all
 run:		$(ISO)
 			qemu-system-i386 -cdrom $(ISO)
 
+test:		$(NAME)
+			qemu-system-i386 -kernel $(NAME)
+
 iso:		$(NAME)
 			mkdir -p $(BOOT)/grub
 			cp $(NAME) $(BOOT)
 			echo 'menuentry "kfs" {\n\tmultiboot /$(BOOT)/$(NAME)\n}' > $(BOOT)/grub/grub.cfg
 			grub-mkrescue -o $(ISO) .
 
-.PHONY:		all clean fclean re run iso
+.PHONY:		all clean fclean re run test iso
