@@ -1,25 +1,4 @@
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
-enum vga_color {
-	VGA_COLOR_BLACK = 0,
-	VGA_COLOR_BLUE = 1,
-	VGA_COLOR_GREEN = 2,
-	VGA_COLOR_CYAN = 3,
-	VGA_COLOR_RED = 4,
-	VGA_COLOR_MAGENTA = 5,
-	VGA_COLOR_BROWN = 6,
-	VGA_COLOR_LIGHT_GREY = 7,
-	VGA_COLOR_DARK_GREY = 8,
-	VGA_COLOR_LIGHT_BLUE = 9,
-	VGA_COLOR_LIGHT_GREEN = 10,
-	VGA_COLOR_LIGHT_CYAN = 11,
-	VGA_COLOR_LIGHT_RED = 12,
-	VGA_COLOR_LIGHT_MAGENTA = 13,
-	VGA_COLOR_LIGHT_BROWN = 14,
-	VGA_COLOR_WHITE = 15,
-};
+#include "kernel.h"
 
 static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg)
 {
@@ -38,10 +17,6 @@ size_t strlen(const char* str)
 		len++;
 	return len;
 }
-
-#define VGA_WIDTH   80
-#define VGA_HEIGHT  25
-#define VGA_MEMORY  0xB8000
 
 size_t terminal_row;
 size_t terminal_column;
@@ -94,8 +69,65 @@ void terminal_writestring(const char* data)
 	terminal_write(data, strlen(data));
 }
 
+void terminal_write_hex(uint32_t value)
+{
+	char hex[] = "0123456789ABCDEF";
+	char buffer[11];
+
+	buffer[0] = '0';
+	buffer[1] = 'x';
+
+	for (int i = 0; i < 8; i++) {
+		buffer[9 - i] = hex[value & 0xF];
+		value >>= 4;
+	}
+
+	buffer[10] = '\0';
+	terminal_writestring(buffer);
+}
+
+static inline uint32_t get_esp(void)
+{
+	uint32_t esp;
+	__asm__ volatile ("mov %%esp, %0" : "=r"(esp));
+	return esp;
+}
+
+void terminal_newline(void)
+{
+	terminal_column = 0;
+	if (++terminal_row == VGA_HEIGHT)
+		terminal_row = 0;
+}
+
+void terminal_writestring_line(const char* str)
+{
+	terminal_writestring(str);
+	terminal_newline();
+}
+
+void print_kernel_stack(uint32_t entries)
+{
+	uint32_t *esp = (uint32_t *)get_esp();
+
+	terminal_writestring_line("Kernel stack (ESP)");
+	terminal_writestring("ESP = ");
+	terminal_write_hex((uint32_t)esp);
+	terminal_newline();
+	terminal_newline();
+
+	for (uint32_t i = 0; i < entries; i++) {
+		terminal_writestring("[");
+		terminal_write_hex((uint32_t)(esp + i));
+		terminal_writestring("] ");
+		terminal_write_hex(esp[i]);
+		terminal_newline();
+	}
+}
+
 void kernel_main(void)
 {
+	gdt_init();
 	terminal_initialize();
-	terminal_writestring("42");
+	print_kernel_stack(8);
 }

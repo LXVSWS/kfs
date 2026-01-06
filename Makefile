@@ -1,6 +1,6 @@
 NAME	= kernel.bin
-CSRCS	= kernel.c
-ASRCS	= boot.s
+CSRCS	= kernel.c gdt.c
+ASRCS	= boot.s gdt_flush.s
 ISO		= kfs.iso
 
 OBJS	= $(CSRCS:.c=.o) $(ASRCS:.s=.o)
