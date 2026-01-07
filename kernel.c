@@ -111,15 +111,12 @@ void print_kernel_stack(uint32_t entries)
 	uint32_t *esp = (uint32_t *)get_esp();
 
 	terminal_writestring_line("Kernel stack (ESP)");
-	terminal_writestring("ESP = ");
-	terminal_write_hex((uint32_t)esp);
-	terminal_newline();
 	terminal_newline();
 
 	for (uint32_t i = 0; i < entries; i++) {
-		terminal_writestring("[");
+		terminal_writestring("Addr : [");
 		terminal_write_hex((uint32_t)(esp + i));
-		terminal_writestring("] ");
+		terminal_writestring("] - Data : ");
 		terminal_write_hex(esp[i]);
 		terminal_newline();
 	}

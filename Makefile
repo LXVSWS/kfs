@@ -1,14 +1,13 @@
 NAME	= kernel.bin
 CSRCS	= kernel.c gdt.c
 ASRCS	= boot.s gdt_flush.s
-ISO		= kfs.iso
+ISO	= kfs.iso
 
 OBJS	= $(CSRCS:.c=.o) $(ASRCS:.s=.o)
 
-CC		= gcc
-LD		= ld
-RM		= rm -rf
-BOOT	= boot
+CC	= gcc
+LD	= ld
+RM	= rm -rf
 
 CFLAGS	= -m32 -fno-builtin -fno-stack-protector -nostdlib -nodefaultlibs -ffreestanding -c
 ASFLAGS	= -m32 -c
@@ -29,7 +28,7 @@ clean:
 			$(RM) $(OBJS)
 
 fclean:		clean
-			$(RM) $(NAME) $(BOOT)
+			$(RM) $(NAME) iso
 
 re:			fclean all
 
@@ -40,9 +39,9 @@ test:		$(NAME)
 			qemu-system-i386 -kernel $(NAME)
 
 iso:		$(NAME)
-			mkdir -p $(BOOT)/grub
-			cp $(NAME) $(BOOT)
-			echo 'menuentry "kfs" {\n\tmultiboot /$(BOOT)/$(NAME)\n}' > $(BOOT)/grub/grub.cfg
-			grub-mkrescue -o $(ISO) .
+			mkdir -p iso/boot/grub
+			cp $(NAME) iso/boot
+			echo 'menuentry "kfs" {\n\tmultiboot /boot/$(NAME)\n}' > iso/boot/grub/grub.cfg
+			grub-mkrescue -o $(ISO) iso
 
 .PHONY:		all clean fclean re run test iso
